@@ -1,0 +1,9 @@
+Här berättar vi lite om vår kod generellt
+
+Placement of the sensors
+
+Choice of critical sections
+
+Maximum train speed and the reason for it
+
+How we tested our solution

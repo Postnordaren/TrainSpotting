@@ -2,8 +2,16 @@ import TSim.*;
 
 public class Lab1 {
 
+  private static final int MAX_SPEED = 15; //vi kör detta än sålänge..
+
   public Lab1(int speed1, int speed2) {
+
     TSimInterface tsi = TSimInterface.getInstance();
+
+    Thread train1 = new Thread(new Train(1, speed1));
+    Thread train2 = new Thread(new Train(2, speed2));
+    train1.start();
+    train2.start();
 
     try {
       tsi.setSpeed(1,speed1);
@@ -13,4 +21,39 @@ public class Lab1 {
       System.exit(1);
     }
   }
+
+  public class Train implements Runnable {
+    int trainId;
+    int speed;
+
+    Train(int trainId, int speed) {
+      this.trainId = trainId;
+      this.speed = speed;
+    }
+
+    public void run() {
+      //will be continued
+    }
+  }
+
+  /*  
+  
+  -- 1. Waiting at stations - trains must wait 1-2 seconds at each station after stopping.
+  -- Avoid randomness
+  
+  -- 2. Maximum trainspeed, must be atleast 15
+  -- All speeds in the range [0,maxpeed] must work.
+
+  -- 3. Two trains, two threads but one implementation
+  -- Use binary sempahores, no locks
+  -- Trains mindre their own business
+  -- Only shared variable is the semaphore.
+
+  -- 4. Fixa sensormetod beroende på critical point.
+  -- t.ex vid stationen ska tågen vänta 1-2 sekunder,
+  -- dvs man kan ha en metod isStation?.
+  */
+
+
+
 }
