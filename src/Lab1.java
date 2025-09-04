@@ -5,15 +5,19 @@ import TSim.*;
 public class Lab1 {
 
   private static final int MAX_SPEED = 15; //vi kör detta än sålänge..
+  public int sleeptime;
+
   public static Semaphore stationSemaphore = new Semaphore(1); 
+  public static Semaphore crossSemaphore = new Semaphore(1);
 
 
   public Lab1(int speed1, int speed2) {
 
     TSimInterface tsi = TSimInterface.getInstance();
 
-    Thread train1 = new Thread(new Train(1, speed1));
-    Thread train2 = new Thread(new Train(2, speed2));
+  
+    Thread train1 = new Thread(new Train(1, speed1, sleeptime));
+    Thread train2 = new Thread(new Train(2, speed2, sleeptime));
     train1.start();
     train2.start();
 
@@ -32,10 +36,11 @@ public class Lab1 {
     int sleepTime = 1000 + (20 * Math.abs(speed)); 
 
 
-    Train(int trainId, int speed) {
+    Train(int trainId, int speed, int sleepTime) {
       this.trainId = trainId;
       this.speed = speed;
       this.sleepTime = sleepTime; 
+
     }
 
     public void run() {
@@ -58,6 +63,22 @@ public class Lab1 {
         stationSemaphore.release();
     }
   }
+
+  public void crossSensor(SensorEvent sensor, int trainId) {
+
+    int x = sensor.getXpos();
+    int y = sensor.getYpos();
+
+    if (isSensorbyCross(x, y)) {
+      try {
+        crossSemaphore.acquire();
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      } finally {
+        crossSemaphore.release();
+      }
+
+  }
 }
   
 
@@ -66,6 +87,13 @@ public class Lab1 {
        return true; 
       }
       return false; 
+    }
+
+    private boolean isSensorbyCross(int x, int y) {
+      if (x == 2 && y == 10) {
+        return true;
+      }
+      return false;
     }
 
 
