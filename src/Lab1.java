@@ -15,7 +15,6 @@ public class Lab1 {
 
     TSimInterface tsi = TSimInterface.getInstance();
 
-  
     Thread train1 = new Thread(new Train(1, speed1, sleeptime));
     Thread train2 = new Thread(new Train(2, speed2, sleeptime));
     train1.start();
@@ -34,6 +33,7 @@ public class Lab1 {
     int trainId;
     int speed;
     int sleepTime = 1000 + (20 * Math.abs(speed)); 
+    private final TSimInterface tsi = TSimInterface.getInstance();
 
 
     Train(int trainId, int speed, int sleepTime) {
@@ -42,21 +42,44 @@ public class Lab1 {
       this.sleepTime = sleepTime; 
 
     }
-
+    
     public void run() {
-      //will be continued
-    }
+      while (true) {
+          try {
+              SensorEvent sensor = tsi.getSensor(trainId);  // blocking call, waits for sensor
+              if (isSensorStation(sensor.getXpos(), sensor.getYpos())) {
+                  stationSensor(sensor);
+              } else if (isSensorbyCross(sensor.getXpos(), sensor.getYpos())) {
+                  crossSensor(sensor);
+              }
+          } catch (CommandException | InterruptedException e) {
+              e.printStackTrace();
+          }
+      }
+  }
+  
+
+    public void switchDirection() {
+      this.speed = -this.speed;
+      try {
+          tsi.setSpeed(trainId, this.speed);
+      } catch (CommandException e) {
+          e.printStackTrace();
+      }
+  }  
 
     
-   public void stationSensor(SensorEvent sensor, int trainid) {
+   public void stationSensor(SensorEvent sensor) throws CommandException {
 
     int x = sensor.getXpos(); 
     int y = sensor.getYpos(); 
-
-    if (isSensorStation(x,y)){
+    
+    if (isSensorStation(x, y)){
     try {
         stationSemaphore.acquire();
-        Thread.sleep(sleepTime); // Pausar tråden
+        tsi.setSpeed(trainId, 0);
+        Thread.sleep(sleepTime); 
+        switchDirection();
     } catch (InterruptedException e) {
         e.printStackTrace();
     } finally {
@@ -65,7 +88,7 @@ public class Lab1 {
   }
 }
 
-  public void crossSensor(SensorEvent sensor, int trainId) {
+  public void crossSensor(SensorEvent sensor) {
 
     int x = sensor.getXpos();
     int y = sensor.getYpos();
@@ -78,11 +101,9 @@ public class Lab1 {
       } finally {
         crossSemaphore.release();
       }
-
   }
 }
   
-
     private boolean isSensorStation(int x, int y){
       if (x == 14 && y == 5||x == 14 && y == 13){
        return true; 
@@ -97,13 +118,7 @@ public class Lab1 {
       }
       return false;
     }
-
-
-
-
-
-
-
+  }
 }
 
 
@@ -134,4 +149,4 @@ public class Lab1 {
 
 
 
-}
+
