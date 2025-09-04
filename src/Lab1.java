@@ -4,7 +4,7 @@ import TSim.*;
 
 public class Lab1 {
 
-  private static final int MAX_SPEED = 15; //vi kör detta än sålänge..
+  private static final int MAX_SPEED = 20; //vi kör detta än sålänge..
   public int sleeptime;
 
   public static Semaphore stationSemaphore = new Semaphore(1); 
@@ -15,8 +15,8 @@ public class Lab1 {
 
     TSimInterface tsi = TSimInterface.getInstance();
 
-    Thread train1 = new Thread(new Train(1, speed1, sleeptime));
-    Thread train2 = new Thread(new Train(2, speed2, sleeptime));
+    Thread train1 = new Thread(new Train(1, speed1));
+    Thread train2 = new Thread(new Train(2, speed2));
     train1.start();
     train2.start();
 
@@ -32,80 +32,72 @@ public class Lab1 {
   public class Train implements Runnable {
     int trainId;
     int speed;
-    int sleepTime = 1000 + (20 * Math.abs(speed)); 
+    int sleepTime;
     private final TSimInterface tsi = TSimInterface.getInstance();
 
 
-    Train(int trainId, int speed, int sleepTime) {
+    Train(int trainId, int speed) {
       this.trainId = trainId;
       this.speed = speed;
-      this.sleepTime = sleepTime; 
+      this.sleepTime = 1500;
 
     }
     
     public void run() {
       while (true) {
-          try {
-              SensorEvent sensor = tsi.getSensor(trainId);  // blocking call, waits for sensor
-              if (isSensorStation(sensor.getXpos(), sensor.getYpos())) {
-                  stationSensor(sensor);
-              } else if (isSensorbyCross(sensor.getXpos(), sensor.getYpos())) {
-                  crossSensor(sensor);
-              }
-          } catch (CommandException | InterruptedException e) {
-              e.printStackTrace();
-          }
-      }
-  }
+        try {
+          tsi.setSpeed(trainId, MAX_SPEED);
+            SensorEvent sensor = tsi.getSensor(trainId); 
+
+            int x = sensor.getXpos();
+            int y = sensor.getYpos();
+
+            if (isSensorStation(x, y)) {
+                stationSensor();
+            } else if (isSensorbyCross(x, y)) {
+                crossSensor();
+            }
+
+        } catch (CommandException | InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+}
   
-
-    public void switchDirection() {
+    public void switchDirection() throws CommandException {
       this.speed = -this.speed;
-      try {
-          tsi.setSpeed(trainId, this.speed);
-      } catch (CommandException e) {
-          e.printStackTrace();
-      }
-  }  
+      tsi.setSpeed(trainId, this.speed);
+    } 
 
     
-   public void stationSensor(SensorEvent sensor) throws CommandException {
-
-    int x = sensor.getXpos(); 
-    int y = sensor.getYpos(); 
-    
-    if (isSensorStation(x, y)){
+   public void stationSensor() throws CommandException {
     try {
-        stationSemaphore.acquire();
+        Lab1.stationSemaphore.acquire();
         tsi.setSpeed(trainId, 0);
         Thread.sleep(sleepTime); 
         switchDirection();
     } catch (InterruptedException e) {
         e.printStackTrace();
     } finally {
-        stationSemaphore.release();
+        Lab1.stationSemaphore.release();
     }
   }
 }
 
-  public void crossSensor(SensorEvent sensor) {
-
-    int x = sensor.getXpos();
-    int y = sensor.getYpos();
-
-    if (isSensorbyCross(x, y)) {
+  public void crossSensor() throws CommandException {  
       try {
-        crossSemaphore.acquire();
+        Lab1.crossSemaphore.acquire();
+        Thread.sleep(5000);
       } catch (InterruptedException e) {
         e.printStackTrace();
       } finally {
-        crossSemaphore.release();
+        Lab1.crossSemaphore.release();
       }
   }
-}
+
   
     private boolean isSensorStation(int x, int y){
-      if (x == 14 && y == 5||x == 14 && y == 13){
+      if (x == 14 && y == 5||(x == 14 && y == 13)){
        return true; 
       }
       return false; 
@@ -119,7 +111,6 @@ public class Lab1 {
       return false;
     }
   }
-}
 
 
 
