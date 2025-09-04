@@ -53,7 +53,7 @@ public class Lab1 {
             int y = sensor.getYpos();
 
             if (isSensorStation(x, y)) {
-                stationSensor();
+                stationSensor(sensor);
             } else if (isSensorbyCross(x, y)) {
                 crossSensor();
             }
@@ -61,6 +61,7 @@ public class Lab1 {
         } catch (CommandException | InterruptedException e) {
             e.printStackTrace();
         }
+        
     }
 }
   
@@ -70,19 +71,20 @@ public class Lab1 {
     } 
 
     
-   public void stationSensor() throws CommandException {
-    try {
-        Lab1.stationSemaphore.acquire();
-        tsi.setSpeed(trainId, 0);
-        Thread.sleep(sleepTime); 
-        switchDirection();
-    } catch (InterruptedException e) {
-        e.printStackTrace();
-    } finally {
-        Lab1.stationSemaphore.release();
+   public void stationSensor(SensorEvent sensor) throws CommandException {
+    if (sensor.getStatus() == SensorEvent.ACTIVE) { // Bara när tåget kommer in
+        try {
+            Lab1.stationSemaphore.acquire();
+            tsi.setSpeed(trainId, 0);
+            Thread.sleep(sleepTime);
+            switchDirection();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } finally {
+            Lab1.stationSemaphore.release();
+        }
     }
   }
-}
 
   public void crossSensor() throws CommandException {  
       try {
@@ -111,6 +113,7 @@ public class Lab1 {
       return false;
     }
   }
+}
 
 
 
