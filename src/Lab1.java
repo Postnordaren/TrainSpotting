@@ -63,6 +63,7 @@ public class Lab1 {
         stationSemaphore.release();
     }
   }
+}
 
   public void crossSensor(SensorEvent sensor, int trainId) {
 
