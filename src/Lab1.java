@@ -1,8 +1,12 @@
+import java.util.concurrent.Semaphore;
+
 import TSim.*;
 
 public class Lab1 {
 
   private static final int MAX_SPEED = 15; //vi kör detta än sålänge..
+  public static Semaphore stationSemaphore = new Semaphore(1); 
+
 
   public Lab1(int speed1, int speed2) {
 
@@ -25,16 +29,55 @@ public class Lab1 {
   public class Train implements Runnable {
     int trainId;
     int speed;
+    int sleepTime = 1000 + (20 * Math.abs(speed)); 
+
 
     Train(int trainId, int speed) {
       this.trainId = trainId;
       this.speed = speed;
+      this.sleepTime = sleepTime; 
     }
 
     public void run() {
       //will be continued
     }
+
+    
+   public void stationSensor(SensorEvent sensor, int trainid) {
+
+    int x = sensor.getXpos(); 
+    int y = sensor.getYpos(); 
+
+    if (isSensorStation(x,y)){
+    try {
+        stationSemaphore.acquire();
+        Thread.sleep(sleepTime); // Pausar tråden
+    } catch (InterruptedException e) {
+        e.printStackTrace();
+    } finally {
+        stationSemaphore.release();
+    }
   }
+}
+  
+
+    private boolean isSensorStation(int x, int y){
+      if (x == 14 && y == 5||x == 14 && y == 13){
+       return true; 
+      }
+      return false; 
+    }
+
+
+}
+
+
+
+
+
+
+  // varje sensor triggar en metod, inte mer än 10 semeforces. 
+
 
   /*  
   
