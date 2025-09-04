@@ -1,6 +1,5 @@
-import java.util.concurrent.Semaphore;
-
 import TSim.*;
+import java.util.concurrent.Semaphore;
 
 public class Lab1 {
 
@@ -44,30 +43,29 @@ public class Lab1 {
     }
     
     public void run() {
-      while (true) {
-        try {
-          tsi.setSpeed(trainId, MAX_SPEED);
-            SensorEvent sensor = tsi.getSensor(trainId); 
-
-            int x = sensor.getXpos();
-            int y = sensor.getYpos();
-
-            if (isSensorStation(x, y)) {
-                stationSensor(sensor);
-            } else if (isSensorbyCross(x, y)) {
-                crossSensor();
-            }
-
-        } catch (CommandException | InterruptedException e) {
-            e.printStackTrace();
-        }
-        
-    }
-}
+      try {
+          tsi.setSpeed(trainId, speed); // Set initial speed before the loop
+          
+          while (true) {
+              SensorEvent sensor = tsi.getSensor(trainId); 
+              int x = sensor.getXpos();
+              int y = sensor.getYpos();
+  
+              if (isSensorStation(x, y) && sensor.getStatus() == SensorEvent.ACTIVE) {
+                  stationSensor(sensor);
+              } else if (isSensorbyCross(x, y) && sensor.getStatus() == SensorEvent.ACTIVE) {
+                  crossSensor();
+              }
+          }
+      } catch (CommandException | InterruptedException e) {
+          e.printStackTrace();
+      }
+  }
   
     public void switchDirection() throws CommandException {
       this.speed = -this.speed;
       tsi.setSpeed(trainId, this.speed);
+      
     } 
 
     
@@ -78,8 +76,10 @@ public class Lab1 {
             tsi.setSpeed(trainId, 0);
             Thread.sleep(sleepTime);
             switchDirection();
+
         } catch (InterruptedException e) {
             e.printStackTrace();
+
         } finally {
             Lab1.stationSemaphore.release();
         }
@@ -99,8 +99,8 @@ public class Lab1 {
 
   
     private boolean isSensorStation(int x, int y){
-      if (x == 14 && y == 5||(x == 14 && y == 13)){
-       return true; 
+      if (x == 14 && y == 5 || x == 14 && y == 13) {
+        return true; 
       }
       return false; 
     }
