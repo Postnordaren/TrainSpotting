@@ -123,11 +123,12 @@ public class Lab1 {
 
   
     private boolean isSensorStation(int x, int y){
-      if ((x == 14 && y == 5) || (x == 14 && y == 13)) {
+      if ((x == 14 && y == 5) || (x == 14 && y == 13 || (x == 14 && y == 4)||(x == 16 && y == 11))) {
         return true; 
       }
       return false; 
     }
+
 
     private boolean isSensorbyCross(int x, int y) {
       if (x == 7 && y == 7 || x == 8 && y == 8 || x == 15 && y == 7 || x == 18 && y == 7 || x == 16 && y == 9 || x == 14 && y == 9 ||
