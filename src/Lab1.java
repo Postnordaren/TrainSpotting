@@ -20,9 +20,9 @@ public class Lab1 {
     Thread train2 = new Thread(new Train(2, speed2));
 
     try {
-      tsi.setSwitch(17, 7, TSimInterface.SWITCH_RIGHT);
-      tsi.setSwitch(3, 11, TSimInterface.SWITCH_RIGHT);
-      tsi.setSwitch(4, 9, TSimInterface.SWITCH_RIGHT);
+      //tsi.setSwitch(17, 7, TSimInterface.SWITCH_RIGHT);
+      //tsi.setSwitch(3, 11, TSimInterface.SWITCH_RIGHT);
+     // tsi.setSwitch(4, 9, TSimInterface.SWITCH_RIGHT);
 
     }
     catch (Exception e) {
@@ -43,15 +43,16 @@ public class Lab1 {
     Train(int trainId, int speed) {
       this.trainId = trainId;
       this.speed = speed;
-      this.sleepTime = 1500;
+      this.sleepTime = 1000 + (20 * Math.abs(speed));
     }
     
     public void run() {
       try {
-          tsi.setSpeed(trainId, speed); // Set initial speed before the loop
+          tsi.setSpeed(trainId, speed);
           
           while (true) {
               SensorEvent sensor = tsi.getSensor(trainId); 
+
               int x = sensor.getXpos();
               int y = sensor.getYpos();
   
@@ -62,6 +63,7 @@ public class Lab1 {
               southStationSensor(sensor);
             }// else if (isSensorbyCross(x, y)) {
              // crossSensor();
+             handleSwitch(sensor);
             //}
           }
           
@@ -74,8 +76,49 @@ public class Lab1 {
     public void switchDirection() throws CommandException {
       this.speed = -this.speed;
       tsi.setSpeed(trainId, this.speed);
-      
     } 
+
+    // Metod för att byta switch
+
+    // sensor 15,7 : switch 17,7 till upp
+    // sensor 18,7 : switch 17,7 till ner
+
+    // sensor 16,9 : switch 15,9 till ner
+    // sensor 14,9 : switch 15,9 till upp
+
+    // sensor 6,10 : switch 4,9 till ner
+    // sensor 2,9 : switch 4,9 till upp
+
+    // sensor 2,11 : switch 3,11 till ner
+    // sensor 3,12 : switch 3,11 till upp
+
+    // sensor 4,11 : switch 3,11 till upp
+
+    public void handleSwitch(SensorEvent sensor) throws CommandException {
+
+      int x = sensor.getXpos();
+      int y = sensor.getYpos();
+  
+      if (x == 15 && y == 7) {
+          tsi.setSwitch(17, 7, TSimInterface.SWITCH_LEFT); // Switch till "upp"
+      } else if (x == 18 && y == 7) {
+          tsi.setSwitch(17, 7, TSimInterface.SWITCH_RIGHT); // Switch till "ner"
+      } else if (x == 16 && y == 9) {
+          tsi.setSwitch(15, 9, TSimInterface.SWITCH_RIGHT); // Switch till "ner"
+      } else if (x == 14 && y == 9) {
+          tsi.setSwitch(15, 9, TSimInterface.SWITCH_LEFT); // Switch till "upp"
+      } else if (x == 6 && y == 10) {
+          tsi.setSwitch(4, 9, TSimInterface.SWITCH_RIGHT); // Switch till "ner"
+      } else if (x == 2 && y == 9) {
+          tsi.setSwitch(4, 9, TSimInterface.SWITCH_LEFT); // Switch till "upp"
+      } else if (x == 2 && y == 11) {
+          tsi.setSwitch(3, 11, TSimInterface.SWITCH_RIGHT); // Switch till "ner"
+      } else if (x == 3 && y == 12) {
+          tsi.setSwitch(3, 11, TSimInterface.SWITCH_LEFT); // Switch till "upp"
+      } else if (x == 6 && y == 11) {
+          tsi.setSwitch(3, 11, TSimInterface.SWITCH_RIGHT); // Switch till "upp"
+      }
+  }
 
     
    public void northStationSensor(SensorEvent sensor) {
