@@ -6,7 +6,9 @@ public class Lab1 {
   private static final int MAX_SPEED = 20; //vi kör detta än sålänge..
   public int sleeptime;
 
-  public static Semaphore stationSemaphore = new Semaphore(1); 
+  public static Semaphore northStationSemaphore = new Semaphore(1); 
+  public static Semaphore southStationSemaphore = new Semaphore(1); 
+
   public static Semaphore crossSemaphore = new Semaphore(1);
 
 
@@ -28,9 +30,8 @@ public class Lab1 {
     }
     train1.start();
     train2.start();
-
-
   }
+
 
   public class Train implements Runnable {
     int trainId;
@@ -73,11 +74,11 @@ public class Lab1 {
     } 
 
     
-   public void stationSensor(SensorEvent sensor) {
+   public void northStationSensor(SensorEvent sensor) {
     //if (sensor.getStatus() == SensorEvent.ACTIVE) { // Bara när tåget kommer in
         try {
             System.out.println(sensor.getXpos() + " " + sensor.getYpos() + " ...");
-            Lab1.stationSemaphore.acquire();
+            Lab1.northStationSemaphore.acquire();
             tsi.setSpeed(trainId, 0);
             Thread.sleep(sleepTime);
             switchDirection();
@@ -85,10 +86,29 @@ public class Lab1 {
             e.printStackTrace();
 
         } finally {
-            Lab1.stationSemaphore.release();
+            Lab1.northStationSemaphore.release();
         }
     //}
   }
+
+  public void southStationSensor(SensorEvent sensor) {
+    //if (sensor.getStatus() == SensorEvent.ACTIVE) { // Bara när tåget kommer in
+        try {
+            System.out.println(sensor.getXpos() + " " + sensor.getYpos() + " ...");
+            Lab1.northStationSemaphore.acquire();
+            tsi.setSpeed(trainId, 0);
+            Thread.sleep(sleepTime);
+            switchDirection();
+        } catch (Exception e) {
+            e.printStackTrace();
+
+        } finally {
+            Lab1.southStationSemaphore.release();
+        }
+    //}
+  }
+
+
 
   public void crossSensor() throws CommandException {  
       try {
@@ -124,9 +144,11 @@ public class Lab1 {
 
 
 
+
+
+
+
   // varje sensor triggar en metod, inte mer än 10 semeforces. 
-
-
   /*  
   
   -- 1. Waiting at stations - trains must wait 1-2 seconds at each station after stopping.
