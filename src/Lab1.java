@@ -16,16 +16,20 @@ public class Lab1 {
 
     Thread train1 = new Thread(new Train(1, speed1));
     Thread train2 = new Thread(new Train(2, speed2));
+
+    try {
+      tsi.setSwitch(17, 7, TSimInterface.SWITCH_RIGHT);
+      tsi.setSwitch(3, 11, TSimInterface.SWITCH_RIGHT);
+      tsi.setSwitch(4, 9, TSimInterface.SWITCH_RIGHT);
+
+    }
+    catch (Exception e) {
+
+    }
     train1.start();
     train2.start();
 
-    try {
-      tsi.setSpeed(1,speed1);
-    }
-    catch (CommandException e) {
-      e.printStackTrace();    // or only e.getMessage() for the error
-      System.exit(1);
-    }
+
   }
 
   public class Train implements Runnable {
@@ -39,7 +43,6 @@ public class Lab1 {
       this.trainId = trainId;
       this.speed = speed;
       this.sleepTime = 1500;
-
     }
     
     public void run() {
@@ -54,7 +57,8 @@ public class Lab1 {
               if (isSensorStation(x, y) && sensor.getStatus() == SensorEvent.ACTIVE) {
                   stationSensor(sensor);
               } else if (isSensorbyCross(x, y) && sensor.getStatus() == SensorEvent.ACTIVE) {
-                  crossSensor();
+                System.out.println(sensor.getXpos() + " " + sensor.getYpos());
+                //crossSensor();
               }
           }
       } catch (CommandException | InterruptedException e) {
@@ -69,21 +73,21 @@ public class Lab1 {
     } 
 
     
-   public void stationSensor(SensorEvent sensor) throws CommandException {
-    if (sensor.getStatus() == SensorEvent.ACTIVE) { // Bara när tåget kommer in
+   public void stationSensor(SensorEvent sensor) {
+    //if (sensor.getStatus() == SensorEvent.ACTIVE) { // Bara när tåget kommer in
         try {
+            System.out.println(sensor.getXpos() + " " + sensor.getYpos() + " ...");
             Lab1.stationSemaphore.acquire();
             tsi.setSpeed(trainId, 0);
             Thread.sleep(sleepTime);
             switchDirection();
-
-        } catch (InterruptedException e) {
+        } catch (Exception e) {
             e.printStackTrace();
 
         } finally {
             Lab1.stationSemaphore.release();
         }
-    }
+    //}
   }
 
   public void crossSensor() throws CommandException {  
@@ -99,7 +103,7 @@ public class Lab1 {
 
   
     private boolean isSensorStation(int x, int y){
-      if (x == 14 && y == 5 || x == 14 && y == 13) {
+      if ((x == 14 && y == 5) || (x == 14 && y == 13)) {
         return true; 
       }
       return false; 
