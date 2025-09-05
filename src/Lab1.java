@@ -55,13 +55,17 @@ public class Lab1 {
               int x = sensor.getXpos();
               int y = sensor.getYpos();
   
-              if (isSensorStation(x, y) && sensor.getStatus() == SensorEvent.ACTIVE) {
-                  stationSensor(sensor);
-              } else if (isSensorbyCross(x, y) && sensor.getStatus() == SensorEvent.ACTIVE) {
-                System.out.println(sensor.getXpos() + " " + sensor.getYpos());
-                //crossSensor();
-              }
+            if (sensor.getStatus() == SensorEvent.ACTIVE) {
+            if (isNorthStation(x, y)) {
+              northStationSensor(sensor);
+            } else if (isSouthStation(x, y)) {
+              southStationSensor(sensor);
+            }// else if (isSensorbyCross(x, y)) {
+             // crossSensor();
+            //}
           }
+          
+        }
       } catch (CommandException | InterruptedException e) {
           e.printStackTrace();
       }
@@ -108,8 +112,6 @@ public class Lab1 {
     //}
   }
 
-
-
   public void crossSensor() throws CommandException {  
       try {
         Lab1.crossSemaphore.acquire();
@@ -121,12 +123,12 @@ public class Lab1 {
       }
   }
 
-  
-    private boolean isSensorStation(int x, int y){
-      if ((x == 14 && y == 5) || (x == 14 && y == 13 || (x == 14 && y == 4)||(x == 16 && y == 11))) {
-        return true; 
-      }
-      return false; 
+    private boolean isNorthStation(int x, int y) {
+      return (x == 14 && y == 5) || (x == 16 && y == 11);
+    }
+    
+    private boolean isSouthStation(int x, int y) {
+      return (x == 14 && y == 13) || (x == 14 && y == 4);
     }
 
 
